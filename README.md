@@ -2,6 +2,106 @@
 
 A powerful automation tool to scrape blog articles from any website and convert them to markdown format for content ingestion and repurposing.
 
+> **📌 This is a Command-Line Tool (CLI)** - Not a web server or hosted service. It runs locally on your computer.
+> 
+> **🆕 New to this?** → [See detailed "How to Run" guide](HOW_TO_RUN.md)
+
+## 🚀 Getting Started in 3 Steps
+
+### Prerequisites
+- **Node.js** (version 14 or higher) - [Download here](https://nodejs.org/)
+- A terminal/command prompt
+- Blog article URLs you want to convert
+
+### Step 1: Install
+```bash
+# Clone the repository
+git clone https://github.com/Entmarketingteam/Markdown-Injest.git
+cd Markdown-Injest
+
+# Install dependencies
+npm install
+```
+
+### Step 2: Run
+```bash
+# Run the tool (it will help you get started)
+npm start
+```
+
+### Step 3: Get Results
+Your converted markdown files will be in the `output/` folder!
+
+---
+
+## 📖 Detailed Instructions
+
+### How to Run This Tool
+
+This is a **command-line tool** that runs on your local computer. Here's everything you need to know:
+
+#### Option 1: Guided Setup (Easiest)
+```bash
+npm start
+```
+The tool will:
+- Check if you have an input file
+- Create an example file if you don't
+- Guide you through what to do next
+
+#### Option 2: With Your Own CSV File
+```bash
+# If you have a CSV file with URLs
+node convert.js my_urls.csv
+
+# To also download images locally
+node convert.js my_urls.csv --download-images
+```
+
+#### What Happens When You Run It?
+1. The tool reads your CSV file containing blog URLs
+2. It visits each URL and extracts the article content
+3. Converts the HTML to clean markdown format
+4. Saves everything to the `output/` folder
+5. Shows you a summary of what was processed
+
+#### Example Run
+```bash
+$ npm start
+
+╔════════════════════════════════════════════════════╗
+║     Markdown Injest - Blog Article Converter      ║
+╚════════════════════════════════════════════════════╝
+
+📖 Processing URLs from: input_urls.csv
+
+Found 3 URLs to process
+
+Processing 1/3...
+Scraping: https://example.com/blog/article1
+✓ Successfully converted
+
+Processing 2/3...
+Scraping: https://example.com/blog/article2
+✓ Successfully converted
+
+Processing 3/3...
+Scraping: https://example.com/blog/article3
+✓ Successfully converted
+
+Results saved to: output/articles_markdown.csv
+Individual markdown files saved to: output/markdown_files
+
+=== Summary ===
+Total URLs: 3
+Successful: 3
+Failed: 0
+
+Done! Check the output directory for results.
+```
+
+---
+
 ## Features
 
 - 📝 Scrapes blog articles from any URL
@@ -11,15 +111,6 @@ A powerful automation tool to scrape blog articles from any website and convert 
 - 💾 Exports results to CSV and individual markdown files
 - 🔗 Converts all relative links to absolute URLs
 - ⚡ Handles multiple articles in batch
-
-## Installation
-
-1. Clone this repository
-2. Install dependencies:
-
-```bash
-npm install
-```
 
 ## Usage
 
@@ -137,6 +228,36 @@ Automatically detects article content using common selectors:
 - `csv-writer` - CSV file writing
 - `turndown` - HTML to Markdown conversion
 - `turndown-plugin-gfm` - GitHub Flavored Markdown support
+
+## Frequently Asked Questions
+
+### How do I run this?
+This is a command-line tool. After installing Node.js and running `npm install`, simply run:
+```bash
+npm start
+```
+See [HOW_TO_RUN.md](HOW_TO_RUN.md) for detailed step-by-step instructions.
+
+### Do I need to host this somewhere?
+**No!** This is not a web application. It runs locally on your computer. You don't need a server or hosting service.
+
+### Is this a website or web server?
+**No.** This is a command-line tool (CLI) that you run in your terminal/command prompt on your local machine.
+
+### How do I use it after installation?
+1. Open your terminal
+2. Navigate to the Markdown-Injest folder: `cd Markdown-Injest`
+3. Run: `npm start`
+4. Follow the prompts or provide your CSV file
+
+### Where do the results go?
+All converted files are saved in the `output/` folder in the same directory where you ran the tool.
+
+### Can I run it multiple times?
+Yes! Just update your CSV file with new URLs and run `npm start` again. Previous results will remain in the output folder unless you delete them.
+
+### Do I need to keep the terminal open?
+Only while the tool is running. Once it finishes and shows "Done!", you can close the terminal and access your files in the output folder.
 
 ## Troubleshooting
 

@@ -1,5 +1,7 @@
 # Quick Start Guide
 
+> **💡 Important:** This is a command-line tool that runs on your computer, not a web service. You run it from your terminal/command prompt.
+
 ## Installation
 
 ```bash
