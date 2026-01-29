@@ -4,7 +4,8 @@
   "description": "Tool to scrape blog articles and convert to markdown format with images",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node convert.js",
+    "convert": "node convert.js",
     "test": "echo \"No tests specified\""
   },
   "keywords": [

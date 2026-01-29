@@ -23,6 +23,17 @@ npm install
 
 ## Usage
 
+### Quick Start
+
+```bash
+# Run with the helper script (recommended for first-time users)
+npm start
+
+# The script will guide you through setup if you don't have an input file
+# Or specify your CSV file:
+node convert.js my_urls.csv
+```
+
 ### Step 1: Prepare Your URL List
 
 Create a CSV file with your blog article URLs. You can:
@@ -40,13 +51,17 @@ https://motionapp.com/resources/blog/article3
 ### Step 2: Run the Scraper
 
 ```bash
-# Using default input file (input_urls.csv)
+# Simple - using the helper script (recommended)
 npm start
 
-# Or specify a custom input file
-node index.js my_urls.csv
+# Or with a custom file
+node convert.js my_urls.csv
 
 # Download images locally (optional)
+node convert.js my_urls.csv --download-images
+
+# Advanced - use the main script directly
+node index.js my_urls.csv
 node index.js my_urls.csv --download-images
 ```
 
