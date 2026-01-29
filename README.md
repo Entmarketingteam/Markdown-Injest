@@ -45,13 +45,21 @@ npm start
 
 # Or specify a custom input file
 node index.js my_urls.csv
+
+# Download images locally (optional)
+node index.js my_urls.csv --download-images
 ```
+
+**Image Download Options:**
+- **Without `--download-images`**: Images remain as URLs pointing to their original sources (faster, smaller output)
+- **With `--download-images`**: Images are downloaded locally and markdown updated to reference local files (self-contained, but larger)
 
 ### Step 3: Get Your Results
 
 The tool creates an `output/` directory with:
 - `articles_markdown.csv` - All articles in CSV format with markdown content
 - `markdown_files/` - Individual .md files for each article
+- `images/` - Downloaded images (when using --download-images flag)
 
 ## Output Format
 

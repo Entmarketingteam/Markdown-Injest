@@ -6,9 +6,11 @@ const csv = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const TurndownService = require('turndown');
 const { gfm } = require('turndown-plugin-gfm');
+const { downloadImagesFromMarkdown } = require('./image-downloader');
 
 // Configuration
 const INPUT_CSV = process.argv[2] || 'input_urls.csv';
+const DOWNLOAD_IMAGES = process.argv.includes('--download-images');
 const OUTPUT_DIR = 'output';
 const OUTPUT_CSV = path.join(OUTPUT_DIR, 'articles_markdown.csv');
 
@@ -177,13 +179,14 @@ async function saveResultsToCsv(results) {
 /**
  * Save individual markdown files
  */
-function saveMarkdownFiles(results) {
+async function saveMarkdownFiles(results) {
   const markdownDir = path.join(OUTPUT_DIR, 'markdown_files');
   if (!fs.existsSync(markdownDir)) {
     fs.mkdirSync(markdownDir, { recursive: true });
   }
   
-  results.forEach((result, index) => {
+  for (let index = 0; index < results.length; index++) {
+    const result = results[index];
     if (result.status === 'success' && result.markdown) {
       // Create a safe filename from the title or URL
       let filename = result.title || `article_${index + 1}`;
@@ -195,12 +198,24 @@ function saveMarkdownFiles(results) {
       
       const filePath = path.join(markdownDir, `${filename}.md`);
       
-      // Create content with metadata
-      const content = `# ${result.title}\n\n**Source:** ${result.url}\n\n---\n\n${result.markdown}`;
+      let content = result.markdown;
       
-      fs.writeFileSync(filePath, content, 'utf8');
+      // Download images if requested
+      if (DOWNLOAD_IMAGES) {
+        console.log(`Downloading images for: ${result.title}...`);
+        try {
+          content = await downloadImagesFromMarkdown(content, result.title, result.url);
+        } catch (error) {
+          console.error(`Error downloading images: ${error.message}`);
+        }
+      }
+      
+      // Create content with metadata
+      const fullContent = `# ${result.title}\n\n**Source:** ${result.url}\n\n---\n\n${content}`;
+      
+      fs.writeFileSync(filePath, fullContent, 'utf8');
     }
-  });
+  }
   
   console.log(`Individual markdown files saved to: ${markdownDir}`);
 }
@@ -210,6 +225,10 @@ function saveMarkdownFiles(results) {
  */
 async function main() {
   console.log('=== Blog Article Markdown Converter ===\n');
+  
+  if (DOWNLOAD_IMAGES) {
+    console.log('Image download mode: ENABLED\n');
+  }
   
   try {
     // Check if input file exists
@@ -223,7 +242,7 @@ async function main() {
       
       console.log(`\nExample file created: ${INPUT_CSV}`);
       console.log('Please update this file with your blog article URLs and run again.');
-      console.log('\nUsage: node index.js [input_csv_file]');
+      console.log('\nUsage: node index.js [input_csv_file] [--download-images]');
       return;
     }
     
@@ -250,7 +269,7 @@ async function main() {
     
     // Save results
     await saveResultsToCsv(results);
-    saveMarkdownFiles(results);
+    await saveMarkdownFiles(results);
     
     // Print summary
     console.log('\n=== Summary ===');

@@ -4,3 +4,5 @@ output/
 .DS_Store
 temp/
 downloads/
+input_urls.csv
+example_urls.csv
