@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const { spawn } = require('child_process');
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -57,43 +58,46 @@ if (!fs.existsSync(inputFile)) {
   process.exit(0);
 }
 
-// Run the converter
+// Run the converter - using spawn to avoid command injection
 console.log(`📖 Processing URLs from: ${inputFile}`);
 if (downloadImages) {
   console.log('🖼️  Image download: ENABLED');
 }
 console.log('');
 
-try {
-  const command = downloadImages 
-    ? `node index.js "${inputFile}" --download-images`
-    : `node index.js "${inputFile}"`;
-  
-  execSync(command, { stdio: 'inherit' });
-  
-  console.log('');
-  console.log('╔════════════════════════════════════════════════════╗');
-  console.log('║                  ✅ SUCCESS!                       ║');
-  console.log('╚════════════════════════════════════════════════════╝');
-  console.log('');
-  console.log('📂 Your converted articles are ready!');
-  console.log('');
-  console.log('   📄 CSV file: output/articles_markdown.csv');
-  console.log('   📁 Markdown files: output/markdown_files/');
-  if (downloadImages) {
-    console.log('   🖼️  Images: output/images/');
-  }
-  console.log('');
-  console.log('💡 Next steps:');
-  console.log('   - Review the markdown files');
-  console.log('   - Edit for your company\'s voice');
-  console.log('   - Import into your CMS');
-  console.log('');
-  
-} catch (error) {
-  console.error('');
-  console.error('❌ An error occurred during conversion');
-  console.error('   Check the output above for details');
-  console.error('');
-  process.exit(1);
+// Use spawn with array of arguments to prevent command injection
+const args = [path.join(__dirname, 'index.js'), inputFile];
+if (downloadImages) {
+  args.push('--download-images');
 }
+
+const child = spawn('node', args, { stdio: 'inherit' });
+
+child.on('exit', (code) => {
+  if (code === 0) {
+    console.log('');
+    console.log('╔════════════════════════════════════════════════════╗');
+    console.log('║                  ✅ SUCCESS!                       ║');
+    console.log('╚════════════════════════════════════════════════════╝');
+    console.log('');
+    console.log('📂 Your converted articles are ready!');
+    console.log('');
+    console.log('   📄 CSV file: output/articles_markdown.csv');
+    console.log('   📁 Markdown files: output/markdown_files/');
+    if (downloadImages) {
+      console.log('   🖼️  Images: output/images/');
+    }
+    console.log('');
+    console.log('💡 Next steps:');
+    console.log('   - Review the markdown files');
+    console.log('   - Edit for your company\'s voice');
+    console.log('   - Import into your CMS');
+    console.log('');
+  } else {
+    console.error('');
+    console.error('❌ An error occurred during conversion');
+    console.error('   Check the output above for details');
+    console.error('');
+    process.exit(code || 1);
+  }
+});

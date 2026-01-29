@@ -3,6 +3,46 @@ const path = require('path');
 const axios = require('axios');
 const crypto = require('crypto');
 
+// Configuration
+const IMAGE_DOWNLOAD_TIMEOUT_MS = 30000;
+const MAX_IMAGE_SIZE_MB = 10;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+
+/**
+ * Validate URL to prevent SSRF attacks
+ */
+function isValidImageUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+    
+    // Only allow http and https protocols
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return false;
+    }
+    
+    // Block localhost and private IP ranges
+    const hostname = url.hostname.toLowerCase();
+    
+    if (['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(hostname)) {
+      return false;
+    }
+    
+    if (hostname.startsWith('10.') || 
+        hostname.startsWith('192.168.') ||
+        hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) {
+      return false;
+    }
+    
+    if (hostname.startsWith('169.254.')) {
+      return false;
+    }
+    
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 /**
  * Download images from markdown content and update references
  */
@@ -42,7 +82,7 @@ async function downloadImagesFromMarkdown(markdownContent, articleTitle, baseUrl
       
       console.log(`  Downloaded: ${path.basename(localPath)}`);
     } catch (error) {
-      console.error(`  Failed to download image: ${download.originalUrl}`, error.message);
+      console.error(`  Failed to download ${download.originalUrl}: ${error.message}`);
     }
   }
   
@@ -53,11 +93,18 @@ async function downloadImagesFromMarkdown(markdownContent, articleTitle, baseUrl
  * Download a single image
  */
 async function downloadImage(url, targetDir) {
+  // Validate URL
+  if (!isValidImageUrl(url)) {
+    throw new Error('Invalid or unsafe URL');
+  }
+  
   const response = await axios.get(url, {
     responseType: 'arraybuffer',
-    timeout: 30000,
+    timeout: IMAGE_DOWNLOAD_TIMEOUT_MS,
+    maxContentLength: MAX_IMAGE_SIZE_BYTES,
+    maxRedirects: 5,
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
   });
   

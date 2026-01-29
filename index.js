@@ -13,6 +13,46 @@ const INPUT_CSV = process.argv[2] || 'input_urls.csv';
 const DOWNLOAD_IMAGES = process.argv.includes('--download-images');
 const OUTPUT_DIR = 'output';
 const OUTPUT_CSV = path.join(OUTPUT_DIR, 'articles_markdown.csv');
+const REQUEST_DELAY_MS = 1000;
+const REQUEST_TIMEOUT_MS = 30000;
+
+/**
+ * Validate URL to prevent SSRF attacks
+ */
+function isValidPublicUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+    
+    // Only allow http and https protocols
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return false;
+    }
+    
+    // Block localhost and private IP ranges
+    const hostname = url.hostname.toLowerCase();
+    
+    // Block localhost variations
+    if (['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(hostname)) {
+      return false;
+    }
+    
+    // Block private IP ranges (simple check)
+    if (hostname.startsWith('10.') || 
+        hostname.startsWith('192.168.') ||
+        hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) {
+      return false;
+    }
+    
+    // Block link-local addresses
+    if (hostname.startsWith('169.254.')) {
+      return false;
+    }
+    
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 // Initialize Turndown service for HTML to Markdown conversion
 const turndownService = new TurndownService({
@@ -34,11 +74,18 @@ async function scrapeArticle(url) {
   try {
     console.log(`Scraping: ${url}`);
     
+    // Validate URL to prevent SSRF attacks
+    if (!isValidPublicUrl(url)) {
+      throw new Error('Invalid or unsafe URL - only public http/https URLs are allowed');
+    }
+    
     const response = await axios.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       },
-      timeout: 30000
+      timeout: REQUEST_TIMEOUT_MS,
+      maxRedirects: 5,
+      maxContentLength: 50 * 1024 * 1024 // 50MB limit
     });
 
     const $ = cheerio.load(response.data);
@@ -263,7 +310,7 @@ async function main() {
       
       // Add a small delay to be respectful to servers
       if (i < urls.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, REQUEST_DELAY_MS));
       }
     }
     
