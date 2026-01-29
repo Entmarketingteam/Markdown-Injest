@@ -3,8 +3,13 @@
 A powerful automation tool to scrape blog articles from any website and convert them to markdown format for content ingestion and repurposing.
 
 > **📌 This is a Command-Line Tool (CLI)** - Not a web server or hosted service. It runs locally on your computer.
-> 
-> **🆕 New to this?** → [See detailed "How to Run" guide](HOW_TO_RUN.md)
+
+## 📚 Documentation
+
+- **🆕 New User?** → [HOW_TO_RUN.md](HOW_TO_RUN.md) - Complete beginner's guide
+- **🎯 Quick Reference** → [QUICKSTART.md](QUICKSTART.md) - Fast setup
+- **📖 Full Guide** → [USAGE_GUIDE.md](USAGE_GUIDE.md) - Visual walkthrough with examples
+- **💡 Examples** → [EXAMPLES.md](EXAMPLES.md) - Real-world use cases
 
 ## 🚀 Getting Started in 3 Steps
 
